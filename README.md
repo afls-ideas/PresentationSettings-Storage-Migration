@@ -27,6 +27,50 @@ LifeSciMetadataCategory (PresentationSettings)
                                         1+ for profile/user overrides)
 ```
 
+### ERD
+
+```mermaid
+erDiagram
+    LifeSciMetadataCategory ||--o{ LifeSciMetadataRecord : "LifeScienceMetadataCategoryId"
+    LifeSciMetadataRecord ||--o{ LifeSciMetadataFieldValue : "LifeScienceMetadataRecordId"
+    LifeSciMetadataRecord ||--o{ LifeSciMetadataAssignment : "LifeSciMetadataRecordId"
+
+    LifeSciMetadataCategory {
+        Id   Id PK
+        Text Name "PresentationSettings"
+    }
+    LifeSciMetadataRecord {
+        Id      Id PK
+        Text    Name "PresentationSettings_OrgLevel"
+        Text    RecordApiName "match key across orgs"
+        Text    Type
+        Boolean IsOrgLevel
+        Boolean IsActive
+        Id      LifeScienceMetadataCategoryId FK
+    }
+    LifeSciMetadataFieldValue {
+        Id       Id PK
+        Text     FieldName "e.g. EnableLaserPointer"
+        Text     DataType "selects the value column"
+        Boolean  HasBooleanValue
+        Text     TextValue
+        Text     PicklistValue
+        Number   IntegerValue
+        Number   NumberValue
+        LongText LongTextValue
+        Id       LifeScienceMetadataRecordId FK
+    }
+    LifeSciMetadataAssignment {
+        Id   Id PK
+        Text AssignmentApiName "match key across orgs"
+        Text AssignmentLevel "Profile / User"
+        Id   AssignedToId "re-resolve per org"
+        Id   LifeSciMetadataRecordId FK
+    }
+```
+
+> **Cardinality:** one `Category` has many `Record`s (one per scope: Org / Profile / User); each `Record` has many `FieldValue`s (×22 for the org-level record) and zero-or-many `Assignment`s (0 for org-level, 1+ for profile/user overrides).
+
 > ⚠️ **Field-name gotcha:** the lookup on **field-values** is `LifeScienceMetadataRecordId` (note the full "…ence…"), while on **assignments** it is `LifeSciMetadataRecordId` (short form) — they are **not** spelled the same.
 
 ### The 22 org-level settings
